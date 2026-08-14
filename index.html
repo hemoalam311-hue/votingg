@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voting System</title>
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tajawal', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navbar */
+    header {
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: var(--primary);
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .nav-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 850px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+    }
+
+    .view {
+      display: none;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .title-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .title-group h2 {
+      font-size: 1.3rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-group p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-top: 2px;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      outline: none;
+      font-size: 0.95rem;
+      transition: border 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+    }
+
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn:hover { background: var(--primary-hover); }
+    .btn-success { background: var(--success); }
+    .btn-success:hover { background: #059669; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { background: var(--bg); }
+
+    .candidate-list {
+      list-style: none;
+      margin-bottom: 1rem;
+    }
+
+    .candidate-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: var(--bg);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+
+    .remove-btn {
+      color: var(--danger);
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Voting UI Compact Cards */
+    .position-section {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    .position-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--bg);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .voter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .vote-card {
+      background: var(--bg);
+      border: 2px solid transparent;
+      border-radius: var(--radius);
+      padding: 0.8rem 0.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .vote-card:hover {
+      border-color: var(--primary);
+      background: white;
+    }
+
+    .vote-card.selected {
+      border-color: var(--primary);
+      background-color: #eff6ff;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      background: white;
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.5rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border: 1px solid var(--border);
+    }
+
+    .vote-card.selected .avatar {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .candidate-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    /* Results UI */
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+    }
+
+    .results-table th, .results-table td {
+      padding: 10px 12px;
+      text-align: right;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    .progress-bar-bg {
+      background: var(--bg);
+      height: 6px;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-bar-fill {
+      background: var(--primary);
+      height: 100%;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    /* Overlay */
+    .overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      display: none;
+    }
+
+    .check-icon {
+      width: 65px;
+      height: 65px;
+      background: var(--success);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      margin-bottom: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon"><i class="fa-solid fa-check-to-slot"></i></div>
+      <span>Voting</span>
+    </div>
+    <button class="nav-btn" onclick="openAdminModal()">
+      <i class="fa-solid fa-chart-pie"></i> النتائج
+    </button>
+  </header>
+
+  <main>
+    <!-- 1. شاشة إعداد المناصب والمرشحين -->
+    <section id="setupView" class="view active">
+      <div class="card">
+        <div class="title-group">
+          <h2><i class="fa-solid fa-users-gear" style="color: var(--primary);"></i> إعداد المناصب والمسابقات</h2>
+          <p>قم بإضافة الأقسام والمناصب واقتراح المرشحين لكل منصب على حدة</p>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
+          <button class="btn btn-outline" onclick="showAddPositionForm()">
+            <i class="fa-solid fa-plus"></i> إضافة منصب جديد
+          </button>
+        </div>
+
+        <!-- منطقة الأقسام -->
+        <div id="positionsSetupContainer"></div>
+
+        <button class="btn btn-success" style="width: 100%; padding: 12px; margin-top: 1rem;" onclick="startVotingProcess()">
+          <i class="fa-solid fa-play"></i> ابدأ التصويت
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. شاشة التصويت (للناخب) -->
+    <section id="votingView" class="view">
+      <div class="title-group" style="text-align: center; margin-bottom: 1.5rem;">
+        <h2><i class="fa-solid fa-vote-yea" style="color: var(--primary);"></i> استمارة التصويت</h2>
+        <p>اختر مرشحك لكل منصب، ثم حدد زر إرسال الأصوات بالأسفل</p>
+      </div>
+
+      <div id="votingPositionsContainer"></div>
+
+      <button class="btn btn-success" style="width: 100%; padding: 14px; font-size: 1.1rem; margin-bottom: 2rem;" onclick="submitVote()">
+        <i class="fa-solid fa-paper-plane"></i> تأكيد وإرسال الأصوات
+      </button>
+    </section>
+
+    <!-- 3. شاشة النتائج -->
+    <section id="resultsView" class="view">
+      <div class="title-group" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2><i class="fa-solid fa-square-poll-vertical" style="color: var(--primary);"></i> لوحة النتائج النهائية</h2>
+          <p id="totalVotersText">عدد التصويتات المسجلة: 0</p>
+        </div>
+        <button class="btn btn-outline" onclick="switchView('votingView')">
+          <i class="fa-solid fa-arrow-right"></i> العودة
+        </button>
+      </div>
+
+      <div id="resultsContainer"></div>
+
+      <div style="margin-top: 1.5rem; text-align: center;">
+        <button class="btn" style="background: var(--danger);" onclick="resetAll()">
+          <i class="fa-solid fa-rotate-right"></i> تصفير النظام وإعادة الضبط
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- شاشة الشكر الخاطفة (تختفي خلال ثانية واحدة) -->
+  <div class="overlay" id="successOverlay">
+    <div class="check-icon"><i class="fa-solid fa-check"></i></div>
+    <h2>تم تسجيل صوتك بنجاح!</h2>
+    <p style="color: var(--text-muted); margin-top: 6px;">شكراً لك</p>
+  </div>
+
+  <script>
+    // الهيكل الأساسي للبيانات: يحتوي كل منصب على قائمته الخاصة
+    let electionData = [
+      {
+        id: 1,
+        title: "المنصب الرئيسي",
+        candidates: []
+      }
+    ];
+
+    let userSelections = {}; // يخزن اختيارات الناخب لكل منصب { positionId: candidateIndex }
+    let totalVotersCount = 0;
+
+    // تهيئة العرض الأولية
+    renderSetupPositions();
+
+    // إظهار نماذج المناصب
+    function renderSetupPositions() {
+      const container = document.getElementById('positionsSetupContainer');
+      container.innerHTML = '';
+
+      electionData.forEach((pos) => {
+        container.innerHTML += `
+          <div class="card" style="border: 1px solid var(--border); box-shadow: none; background: #fafafa;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <input type="text" value="${pos.title}" onchange="updatePositionTitle(${pos.id}, this.value)" style="font-weight: 700; max-width: 250px;" placeholder="اسم المنصب...">
+              ${electionData.length > 1 ? `<button class="remove-btn" onclick="removePosition(${pos.id})"><i class="fa-solid fa-trash"></i> حذف المنصب</button>` : ''}
+            </div>
+            
+            <div class="input-group">
+              <input type="text" id="candidateInput_${pos.id}" placeholder="اسم المرشح لهذا المنصب...">
+              <button class="btn" onclick="addCandidateToPosition(${pos.id})"><i class="fa-solid fa-user-plus"></i> إضافة</button>
+            </div>
+
+            <ul class="candidate-list">
+              ${pos.candidates.map((c, index) => `
+                <li class="candidate-item">
+                  <span><i class="fa-solid fa-user-tie" style="margin-left: 6px; color: var(--text-muted);"></i> ${c.name}</span>
+                  <button class="remove-btn" onclick="removeCandidate(${pos.id}, ${index})"><i class="fa-solid fa-xmark"></i></button>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        `;
+      });
+    }
+
+    function showAddPositionForm() {
+      const newId = Date.now();
+      electionData.push({
+        id: newId,
+        title: `منصب جديد ${electionData.length + 1}`,
+        candidates: []
+      });
+      renderSetupPositions();
+    }
+
+    function updatePositionTitle(id, val) {
+      const pos = electionData.find(p => p.id === id);
+      if (pos) pos.title = val.trim() || "منصب بدون عنوان";
+    }
+
+    function removePosition(id) {
+      electionData = electionData.filter(p => p.id !== id);
+      renderSetupPositions();
+    }
+
+    function addCandidateToPosition(posId) {
+      const input = document.getElementById(`candidateInput_${posId}`);
+      const name = input.value.trim();
+      if (!name) return;
+
+      const pos = electionData.find(p => p.id === posId);
+      if (pos) {
+        pos.candidates.push({ name: name, votes: 0 });
+        input.value = '';
+        renderSetupPositions();
+      }
+    }
+
+    function removeCandidate(posId, candidateIndex) {
+      const pos = electionData.find(p => p.id === posId);
+      if (pos) {
+        pos.candidates.splice(candidateIndex, 1);
+        renderSetupPositions();
+      }
+    }
+
+    // بدء التصويت
+    function startVotingProcess() {
+      for (let pos of electionData) {
+        if (pos.candidates.length < 1) {
+          alert(`يرجى إضافة مرشح واحد على الأقل لمنصب: (${pos.title})`);
+          return;
+        }
+      }
+      renderVotingGrid();
+      switchView('votingView');
+    }
+
+    // بناء شاشات الناخب لمختلف المناصب
+    function renderVotingGrid() {
+      const container = document.getElementById('votingPositionsContainer');
+      container.innerHTML = '';
+      userSelections = {};
+
+      electionData.forEach(pos => {
+        let cardsHTML = pos.candidates.map((c, index) => `
+          <div class="vote-card" id="card_${pos.id}_${index}" onclick="selectCandidate(${pos.id}, ${index})">
+            <div class="avatar">${c.name.charAt(0)}</div>
+            <div class="candidate-name">${c.name}</div>
+          </div>
+        `).join('');
+
+        container.innerHTML += `
+          <div class="position-section">
+            <div class="position-title"><i class="fa-solid fa-award"></i> ${pos.title}</div>
+            <div class="voter-grid">${cardsHTML}</div>
+          </div>
+        `;
+      });
+    }
+
+    function selectCandidate(posId, candidateIndex) {
+      // إزالة تحديد القديم لهذا المنصب تحديداً
+      const pos = electionData.find(p => p.id === posId);
+      pos.candidates.forEach((_, idx) => {
+        const el = document.getElementById(`card_${posId}_${idx}`);
+        if (el) el.classList.remove('selected');
+      });
+
+      // تحديد الجديد
+      const selectedEl = document.getElementById(`card_${posId}_${candidateIndex}`);
+      if (selectedEl) selectedEl.classList.add('selected');
+
+      userSelections[posId] = candidateIndex;
+    }
+
+    // إرسال التصويت
+    function submitVote() {
+      // التحقق من تصويت الناخب في كل المنصات
+      for (let pos of electionData) {
+        if (userSelections[pos.id] === undefined) {
+          alert(`من فضلك اختر مرشحاً لمنصب: (${pos.title})`);
+          return;
+        }
+      }
+
+      // إضافة الأصوات
+      electionData.forEach(pos => {
+        const selectedIndex = userSelections[pos.id];
+        pos.candidates[selectedIndex].votes++;
+      });
+
+      totalVotersCount++;
+
+      // إظهار شاشة الشكر لمدة ثانية واحدة فقط
+      const overlay = document.getElementById('successOverlay');
+      overlay.style.display = 'flex';
+
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        renderVotingGrid(); // إعادة تجهيز الصفحة للناخب القادم
+      }, 1000);
+    }
+
+    // فتح شاشة النتائج
+    function openAdminModal() {
+      if (electionData.length === 0) {
+        switchView('setupView');
+        return;
+      }
+      
+      const pass = prompt("أدخل كلمة السر لرؤية النتائج:");
+      if (pass === "0000") {
+        renderResults();
+        switchView('resultsView');
+      } else if (pass !== null) {
+        alert("كلمة السر غير صحيحة!");
+      }
+    }
+
+    // عرض النتائج مرتبة تنازلياً حسب الأصوات لكل منصب
+    function renderResults() {
+      const container = document.getElementById('resultsContainer');
+      container.innerHTML = '';
+
+      document.getElementById('totalVotersText').innerText = `عدد التصويتات المسجلة: ${totalVotersCount}`;
+
+      electionData.forEach(pos => {
+        // حساب إجمالي أصوات هذا المنصب
+        const posTotalVotes = pos.candidates.reduce((sum, c) => sum + c.votes, 0);
+
+        // عمل نسخة وترتيبها من الأعلى للأقل
+        let sortedCandidates = [...pos.candidates].sort((a, b) => b.votes - a.votes);
+
+        let rowsHTML = sortedCandidates.map((c) => {
+          const percentage = posTotalVotes === 0 ? 0 : Math.round((c.votes / posTotalVotes) * 100);
+          return `
+            <tr>
+              <td>
+                <strong>${c.name}</strong>
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" style="width: ${percentage}%"></div>
+                </div>
+              </td>
+              <td><i class="fa-solid fa-check-to-slot" style="color: var(--primary);"></i> ${c.votes}</td>
+              <td><strong>${percentage}%</strong></td>
+            </tr>
+          `;
+        }).join('');
+
+        container.innerHTML += `
+          <div class="card">
+            <div class="position-title"><i class="fa-solid fa-ranking-star"></i> نتائج: ${pos.title}</div>
+            <table class="results-table">
+              <thead>
+                <tr>
+                  <th>المرشح</th>
+                  <th>الأصوات</th>
+                  <th>النسبة</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHTML}</tbody>
+            </table>
+          </div>
+        `;
+      });
+    }
+
+    // إعادة الضبط
+    function resetAll() {
+      if (confirm("هل أنت متأكد من تصفير جميع النتائج وإعادة تعيين النظام؟")) {
+        electionData = [{ id: Date.now(), title: "المنصب الرئيسي", candidates: [] }];
+        userSelections = {};
+        totalVotersCount = 0;
+        renderSetupPositions();
+        switchView('setupView');
+      }
+    }
+
+    function switchView(viewId) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+    }
+  </script>
+</body>
+</html>
